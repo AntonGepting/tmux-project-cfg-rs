@@ -2,12 +2,7 @@ extern crate tmux_interface;
 // TODO: in cfg session single then no list expected for deserialize, more then vector
 //use std::time::Duration;
 
-use self::tmux_interface::NewSession;
-use self::tmux_interface::TmuxInterface;
-//use self::tmux_itf::Session;
-use self::tmux_interface::Sessions;
-//use self::tmux_itf::SendKeys;
-//use self::tmux_interface::SelectWindow;
+use self::tmux_interface::{NewSession, TmuxInterface, Sessions, SelectWindow};
 //use super::keys::KeysCfg;
 
 //use std::collections::HashMap;
@@ -66,6 +61,7 @@ pub struct SessionOptionsCfg {
     pub send_keys: Option<KeysCfg>,
 }
 
+// $id
 impl SessionCfg {
     pub fn new(name: String, options: Option<SessionOptionsCfg>) -> Self {
         let mut map = BTreeMap::new();
@@ -99,6 +95,8 @@ impl SessionCfg {
             ..Default::default()
         };
         let (_key, first_value) = self.0.iter().next().unwrap();
+        let mut windows = None;
+        let mut select_window = None;
         if let Some(value) = first_value {
             new_session.attach = value.attach;
             new_session.detached = value.detached;
@@ -113,39 +111,25 @@ impl SessionCfg {
             new_session.width = value.width;
             new_session.height = value.height;
             new_session.shell_command = value.shell_command.as_ref().map(|s| s.as_str());
+            windows = value.windows.as_ref();
+            select_window = value.select_window.as_ref();
         };
         let tmux = TmuxInterface::new();
-        //info!("{}: {}...", LOG_CLI_CREATE_SESSION, &new_session.session_name.unwrap());
         let output = tmux.new_session(&new_session)?;
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
 
-        //if let Some(ref send_keys) = self.send_keys {
-        //let send_keys = SendKeys {
-        //disable_lookup: None,
-        //mouse_event: None,
-        //copy_mode: None,
-        //reset: None,
-        //repeat_count: None,
-        //target_pane: None,
-        //keys: ""
-        //};
-        //tmux.send_keys(&self.send_keys);
-        //}
+        if let Some(windows) = windows {
+            WindowsCfg::create(&windows, self.get_name().unwrap())?;
+        }
 
-        //if let Some(ref windows) = self.windows {
-        //info!("{}...", LOG_CLI_CREATE_WINDOWS);
-        //WindowsCfg::create(windows, &new_session.session_name.as_ref().unwrap())?;
-        //}
-
-        //if let Some(ref select_window_str) = self.select_window {
-        //info!("{}: {}", LOG_CLI_SELECT_WINDOW, &select_window_str);
-        //let select_window = SelectWindow {
-        //target_window: Some(select_window_str),
-        //..Default::default()
-        //};
-        //tmux.select_window(&select_window)?;
-        //}
+        if let Some(select_window) = select_window {
+            let select_window = SelectWindow {
+                target_window: Some(&select_window),
+                ..Default::default()
+            };
+            tmux.select_window(&select_window)?;
+        }
 
         Ok(id)
     }
@@ -156,13 +140,12 @@ impl SessionCfg {
             let sessions = Sessions::get()?;
             for session in sessions {
                 if session.name == Some(session_name.to_string()) {
-                    //let windows_cfg = WindowsCfg::get(session_name).ok();
+                    let windows_cfg = WindowsCfg::get(session_name).ok();
                     let options = SessionOptionsCfg {
-                        //session_name: session.clone().name,
-                        //windows: windows_cfg,
                         activity: session.activity.map(|t| t.as_millis()),
                         created: session.created.map(|t| t.as_millis()),
                         last_attached: session.last_attached.map(|t| t.as_millis()),
+                        windows: windows_cfg,
                         ..Default::default()
                     };
                     let session_cfg = SessionCfg::new(session.name.unwrap(), Some(options));

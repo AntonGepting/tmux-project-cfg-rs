@@ -1,18 +1,14 @@
 extern crate tmux_interface;
 
 use super::error::Error;
-//use super::panes_cfg::PanesCfg;
-use super::window_cfg::WindowCfg;
-use super::window_cfg::WindowOptionsCfg;
-
-use self::tmux_interface::Windows;
-
-use self::tmux_interface::TmuxInterface;
-use self::tmux_interface::TmuxOption;
+use super::panes_cfg::PanesCfg;
+use super::window_cfg::{WindowCfg, WindowOptionsCfg};
+use self::tmux_interface::{Windows, TmuxInterface, TmuxOption};
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct WindowsCfg(Vec<WindowCfg>);
 
+// @id
 impl WindowsCfg {
     pub fn new() -> Self {
         Default::default()
@@ -66,11 +62,12 @@ impl WindowsCfg {
         if tmux.has_session(Some(target_session))? {
             let windows = Windows::get(&target_session).unwrap();
             for window in windows {
-                //let _panes_cfg = PanesCfg::get(&window.clone().name.unwrap()).ok();
+                let panes_cfg = PanesCfg::get(&window.clone().name.unwrap()).ok();
                 let options = WindowOptionsCfg {
                     activity: window.activity.map(|t| t.as_millis()),
                     index: window.index,
                     active: window.active,
+                    panes: panes_cfg,
                     ..Default::default()
                 };
                 window_cfg = WindowCfg::new(window.name.unwrap(), Some(options));

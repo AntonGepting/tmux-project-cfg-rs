@@ -1,13 +1,11 @@
 extern crate tmux_interface;
 
 use super::panes_cfg::PanesCfg;
-//use super::pane_cfg::PaneCfg;
+use super::pane_cfg::PaneCfg;
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
 
-use self::tmux_interface::NewWindow;
-//use self::tmux_interface::SelectWindow;
-use self::tmux_interface::TmuxInterface;
+use self::tmux_interface::{NewWindow, SelectWindow, TmuxInterface};
 
 use std::collections::BTreeMap;
 
@@ -58,6 +56,7 @@ pub struct WindowOptionsCfg {
     pub active: Option<bool>,
 }
 
+// @id
 impl WindowCfg {
     pub fn new(name: String, options: Option<WindowOptionsCfg>) -> Self {
         let mut map = BTreeMap::new();
@@ -77,6 +76,8 @@ impl WindowCfg {
         };
         let (_key, first_value) = self.0.iter().next().unwrap();
         let mut send_keys = None;
+        let mut panes = None;
+        let mut select_pane = None;
         if let Some(value) = first_value {
             new_window.add = value.add;
             new_window.detached = value.detached;
@@ -87,38 +88,39 @@ impl WindowCfg {
             new_window.window_name = value.window_name.as_ref().map(|s| s.as_str());
             new_window.target_window = Some(&target_window_str);
             new_window.shell_command = value.shell_command.as_ref().map(|s| s.as_str());
+
             send_keys = value.send_keys.clone();
+            panes = value.panes.as_ref();
+            select_pane = value.select_pane;
         }
         let output = tmux.new_window(new_window)?;
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
         //let target_window_str = format!("{}.%{}", target_window, id);
         send_keys.and_then(|k| k.send(&target_window_str).ok());
-
-        //let target_window_str2 = format!("{}:{}", &target_session, target_window);
-        //if let Some(ref panes_cfg) = self.panes {
-        //panes_cfg.create(&target_window_str)?;
-        //}
-        //if let Some(ref select_pane) = self.select_pane {
-        //PaneCfg::select(select_pane);
-        //}
-
+        if let Some(panes_cfg) = panes {
+            panes_cfg.create(&target_window_str)?;
+        }
+        if let Some(select_pane) = select_pane {
+            let target_pane = format!("{}:{}.{}", &target_session, target_window, select_pane);
+            PaneCfg::select(&target_pane)?;
+        }
         Ok(id)
     }
 
-    //pub fn exists() {
-    //unimplemented!();
-    //}
+    pub fn exists() {
+        unimplemented!();
+    }
 
-    //pub fn select(target_window: &str) -> Result<(), Error>{
-    //let tmux = TmuxInterface::new();
-    //let select_window = SelectWindow {
-    //target_window: Some(target_window),
-    //..Default::default()
-    //};
-    //tmux.select_window(&select_window)?;
-    //Ok(())
-    //}
+    pub fn select(target_window: &str) -> Result<(), Error>{
+        let tmux = TmuxInterface::new();
+        let select_window = SelectWindow {
+            target_window: Some(target_window),
+            ..Default::default()
+        };
+        tmux.select_window(&select_window)?;
+        Ok(())
+    }
 
     pub fn rename(&self, target_window: &str, new_name: &str) -> Result<(), Error> {
         let tmux = TmuxInterface::new();

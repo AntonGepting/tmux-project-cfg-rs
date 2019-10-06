@@ -1,18 +1,17 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::SplitWindow;
-//use self::tmux_interface::SelectPane;
-use self::tmux_interface::TmuxInterface;
+use self::tmux_interface::{SplitWindow, SelectPane, TmuxInterface, Panes};
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
 use std::collections::BTreeMap;
+//use super::panes_cfg::PanesCfg;
 
-#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PaneCfg(pub BTreeMap<String, Option<PaneOptionsCfg>>);
 
 // TODO: #[skip_serializing_null] added in new serde
 // XXX: cant use borrowed values [link](https://github.com/dtolnay/serde-yaml/issues/94)
-#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PaneOptionsCfg {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent: Option<String>,
@@ -48,6 +47,7 @@ pub struct PaneOptionsCfg {
     pub active: Option<bool>,
 }
 
+// %id
 impl PaneCfg {
     pub fn new(name: String, options: Option<PaneOptionsCfg>) -> Self {
         let mut map = BTreeMap::new();
@@ -93,15 +93,32 @@ impl PaneCfg {
         Ok(id)
     }
 
-    //pub fn select(target_pane: &str) -> Result<(), Error> {
-    //let tmux = TmuxInterface::new();
-    //let select_pane = SelectPane {
-    //target_pane: Some(target_pane),
-    //..Default::default()
-    //};
-    //tmux.select_pane(&select_pane)?;
-    //Ok(())
-    //}
+    pub fn select(target_pane: &str) -> Result<(), Error> {
+        let tmux = TmuxInterface::new();
+        let select_pane = SelectPane {
+            target_pane: Some(target_pane),
+            ..Default::default()
+        };
+        tmux.select_pane(&select_pane)?;
+        Ok(())
+    }
+
+    pub fn get(target_window: &str, pane_id: usize) -> Result<PaneCfg, Error> {
+        let tmux = TmuxInterface::new();
+        let panes = Panes::get(target_window)?;
+        for pane in panes {
+            if pane.id == Some(pane_id) {
+                let options = PaneOptionsCfg {
+                    //detached: pane.detached,
+                    index: pane.index,
+                    ..Default::default()
+                };
+                let pane_cfg = PaneCfg::new(pane.title.unwrap(), Some(options));
+                return Ok(pane_cfg);
+            }
+        }
+        Err(Error::new("iasdfsdf"))
+    }
 }
 
 impl PaneOptionsCfg {

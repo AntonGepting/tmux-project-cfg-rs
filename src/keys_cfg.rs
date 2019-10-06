@@ -8,7 +8,7 @@ use super::error::Error;
 
 // TODO: #[skip_serializing_null] added in new serde
 // XXX: cant use borrowed values [link](https://github.com/dtolnay/serde-yaml/issues/94)
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct KeysCfg {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub disable_lookup: Option<bool>,
@@ -24,20 +24,6 @@ pub struct KeysCfg {
     pub target_pane: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub keys: Option<Vec<String>>,
-}
-
-impl Default for KeysCfg {
-    fn default() -> Self {
-        KeysCfg {
-            repeat_count: None,
-            target_pane: None,
-            disable_lookup: None,
-            mouse_event: None,
-            reset: None,
-            copy_mode: None,
-            keys: None,
-        }
-    }
 }
 
 impl KeysCfg {

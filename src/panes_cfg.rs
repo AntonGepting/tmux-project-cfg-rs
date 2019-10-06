@@ -1,12 +1,10 @@
 extern crate tmux_interface;
 
 use super::error::Error;
-use super::pane_cfg::PaneCfg;
-use super::pane_cfg::PaneOptionsCfg;
-
+use super::pane_cfg::{PaneCfg, PaneOptionsCfg};
 use self::tmux_interface::Panes;
 
-#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PanesCfg(Vec<PaneCfg>);
 
 //impl IntoIterator for PanesCfg {
@@ -19,6 +17,7 @@ pub struct PanesCfg(Vec<PaneCfg>);
 //}
 //
 
+// %id
 impl PanesCfg {
     pub fn new() -> Self {
         Default::default()
