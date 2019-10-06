@@ -3,6 +3,7 @@ fn pane_create() {
     use self::tmux_interface::TmuxInterface;
     use super::pane_cfg::PaneCfg;
     use super::pane_cfg::PaneOptionsCfg;
+    use self::tmux_interface::TmuxInterface;
 
     let options = PaneOptionsCfg {
         detached: Some(true),
