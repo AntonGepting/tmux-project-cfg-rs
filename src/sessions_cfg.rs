@@ -27,7 +27,6 @@ impl SessionsCfg {
     // TODO: Result
     // XXX: clone() - really needed?
     pub fn create(&self) -> Result<(), Error> {
-        //info!("{}", LOG_SESSIONS_CFG_CREATE);
         for session_cfg in &self.0 {
             //if let Some(session) = session_cfg.values().next().unwrap_or(&None) {
             //if let Some(ref start_directory) = self.start_directory {
@@ -57,7 +56,6 @@ impl SessionsCfg {
         Ok(())
     }
 
-    // XXX: clone() - really needed?
     pub fn get(sessions_names: Vec<&str>) -> Result<SessionsCfg, Error> {
         let mut sessions_cfg = SessionsCfg::new();
         let mut session_cfg: SessionCfg;

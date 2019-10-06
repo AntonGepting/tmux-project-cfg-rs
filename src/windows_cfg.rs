@@ -78,31 +78,6 @@ impl WindowsCfg {
         Err(Error::new("asdf"))
     }
 
-    //pub fn get(target_session: &str) -> Result<WindowsCfg, ()> {
-    //let tmux = Tmux::new(None);
-    //let mut windows_cfg: WindowsCfg = Vec::new();
-    //let mut window_cfg: WindowCfg;
-    //if tmux.has_session(target_session).unwrap() {
-    //let windows_str = tmux.list_windows(false, Some(LIST_WINDOWS_FORMAT), Some(target_session)).unwrap();
-    //let windows = Windows::from_str(&windows_str).unwrap();
-    //for window in windows {
-    //let _panes_cfg = PaneCfg::get(&window.index.to_string()).ok();
-    //let mut hashmap: HashMap<String, Option<WindowCfg>> = HashMap::new();
-    //window_cfg = WindowCfg {
-    //activity: Some(window.activity.as_millis()),
-    //index: Some(window.index),
-    //window_name: Some(window.clone().name),
-    //active: if window.active { Some(true) } else { None },
-    //..Default::default()
-    //};
-    //hashmap.insert(window.name.clone(), Some(window_cfg));
-    //windows_cfg.push(hashmap.clone());
-    //}
-    //return Ok(windows_cfg);
-    //}
-    //return Err(());
-    //}
-
     pub fn push(&mut self, window: WindowCfg) {
         self.0.push(window)
     }

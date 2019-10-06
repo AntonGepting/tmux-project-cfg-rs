@@ -65,7 +65,6 @@ impl WindowCfg {
     }
 
     pub fn create(self, target_session: &str, target_window: usize) -> Result<usize, Error> {
-        //info!("create window \n");
         let tmux = TmuxInterface::new();
         let target_window_str = format!("{}:{}", &target_session, target_window);
         let mut new_window = NewWindow {
