@@ -33,7 +33,10 @@ fn session_parse() {
 #[test]
 fn session_get() {
     use super::session_cfg::SessionCfg;
+    use std::fs;
+
     let session_cfg = SessionCfg::get("0").unwrap();
     let session_str = serde_yaml::to_string(&session_cfg).unwrap();
-    dbg!(session_str);
+    dbg!(&session_str);
+    fs::write("asdfasdf.yml", session_str.as_bytes()).unwrap();
 }
