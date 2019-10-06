@@ -1,8 +1,8 @@
 #[test]
 fn pane_create() {
+    use self::tmux_interface::TmuxInterface;
     use super::pane_cfg::PaneCfg;
     use super::pane_cfg::PaneOptionsCfg;
-    use self::tmux_interface::TmuxInterface;
 
     let options = PaneOptionsCfg {
         detached: Some(true),
@@ -36,11 +36,11 @@ fn pane_parse() {
     let pane_str = serde_yaml::to_string(&pane).unwrap();
     //let pane_str = r#"
     //pane:
-        //detached: true
-        //horizontal: true
-        //percentage: 50
-        //send_keys:
-            //keys: ["top"]
+    //detached: true
+    //horizontal: true
+    //percentage: 50
+    //send_keys:
+    //keys: ["top"]
     //"#;
     let target_window = "0:1";
     let pane_cfg: PaneCfg = serde_yaml::from_str(&pane_str).unwrap();

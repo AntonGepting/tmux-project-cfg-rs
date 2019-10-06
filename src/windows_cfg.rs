@@ -1,9 +1,9 @@
 extern crate tmux_interface;
 
+use self::tmux_interface::{TmuxInterface, TmuxOption, Windows};
 use super::error::Error;
 use super::panes_cfg::PanesCfg;
 use super::window_cfg::{WindowCfg, WindowOptionsCfg};
-use self::tmux_interface::{Windows, TmuxInterface, TmuxOption};
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct WindowsCfg(Vec<WindowCfg>);

@@ -49,11 +49,10 @@ impl SessionsCfg {
 
     // TODO: Result
     pub fn kill(&self) -> Result<(), Error> {
-        for _session_cfg in &self.0 {
-            //let session_name = session_cfg.keys().next().map(|s| s.as_ref());
-            //if session.exists(session_name)? {
-            //session.kill(session_name)?;
-            //}
+        for session_cfg in &self.0 {
+            if session_cfg.exists()? {
+                session_cfg.kill()?;
+            }
         }
         Ok(())
     }
@@ -64,7 +63,6 @@ impl SessionsCfg {
         let mut session_cfg: SessionCfg;
         for session_name in sessions_names {
             session_cfg = SessionCfg::get(session_name)?;
-            //hashmap.insert(session_cfg.clone().session_name.unwrap(), Some(session_cfg));
             sessions_cfg.push(session_cfg);
         }
         Ok(sessions_cfg)

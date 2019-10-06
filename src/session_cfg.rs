@@ -2,7 +2,7 @@ extern crate tmux_interface;
 // TODO: in cfg session single then no list expected for deserialize, more then vector
 //use std::time::Duration;
 
-use self::tmux_interface::{NewSession, TmuxInterface, Sessions, SelectWindow};
+use self::tmux_interface::{AttachSession, NewSession, SelectWindow, Sessions, TmuxInterface};
 //use super::keys::KeysCfg;
 
 //use std::collections::HashMap;
@@ -157,67 +157,36 @@ impl SessionCfg {
     }
 
     // XXX: self check really needed?
-    // XXX: opt
+    // XXX: Option instead of result?
     pub fn exists(&self) -> Result<bool, Error> {
-        let (_key, _first_value) = self.0.iter().next().unwrap();
         let session_name = self.get_name();
         let tmux = TmuxInterface::new();
         Ok(tmux.has_session(session_name)?)
     }
 
-    pub fn attach(&self) -> bool {
-        //let mut args: Vec<String> = Vec::new();
-        //args.extend_from_slice(&[T_KEY.to_string(), name.to_string()]);
-        //let mut tmux: Command = Tmux::new();
-        //let output = tmux.exec(ATTACH_SESSION_CMD, &args);
-        //output.success()
-        false
+    pub fn attach(&self) -> Result<(), Error> {
+        let session_name = self.get_name();
+        let attach_session = AttachSession {
+            ..Default::default()
+        };
+        let tmux = TmuxInterface::new();
+        tmux.attach_session(&attach_session)?;
+        Ok(())
     }
 
-    //pub fn get_windows(&self) -> Result<SessionCfg, ()>{
-    //let mut windows_cfg: Windows_= Vec::new();
-    //let mut hashmap = HashMap::new();
-    //let mut session_cfg: SessionCfg;
-    //for session_name in sessions_names {
-    //session_cfg = SessionCfg::get(session_name).unwrap();
-    //hashmap.insert(session_cfg.clone().session_name.unwrap(), Some(session_cfg));
-    //sessions_cfg.push(hashmap.clone());
-    //project.sessions = Some(sessions_cfg.clone());
-    //}
-    //Ok(project)
-    //}
-
     pub fn kill(&self) -> Result<(), Error> {
-        let (_key, _first_value) = self.0.iter().next().unwrap();
         let session_name = self.get_name();
         let tmux = TmuxInterface::new();
         tmux.kill_session(None, None, session_name)?;
         Ok(())
     }
 
-    //pub fn rename(&self, new_name: &str) {
-    //if let Some(ref session_name) = self.session_name {
-    //let tmux = TmuxInterface::new();
-    //tmux.rename_session(Some(session_name), new_name).unwrap();
-    //}
-
-    // TODO: refactor Result
-    //
-    //pub fn list_windows(target_session: usize) -> Result<Vec<Window>, usize> {
-    //let mut tmux = Command::new(TMUX);
-    //let mut args: Vec<String> = Vec::new();
-    //args.push(LIST_WINDOWS_CMD.to_string());
-    //args.extend_from_slice(&[_F_KEY.to_string(), LIST_WINDOWS_FORMAT.to_string(),
-    //T_KEY.to_string(), target_session.to_string()]);
-    //let output = tmux.args(args).output().expect("failed to execute process");
-    //let stdout = String::from_utf8_lossy(output.stdout.as_slice());
-    //let mut windows: Vec<Window> = Vec::new();
-    //for line in stdout.lines() {
-    ////println!("line: {:?}", line);
-    //windows.push(Window::get_from_string(line).unwrap());
-    //}
-    //Ok(windows)
-    //}
+    pub fn rename(&self, new_name: &str) -> Result<(), Error> {
+        let session_name = self.get_name();
+        let tmux = TmuxInterface::new();
+        tmux.rename_session(session_name, new_name)?;
+        Ok(())
+    }
 }
 
 impl SessionOptionsCfg {

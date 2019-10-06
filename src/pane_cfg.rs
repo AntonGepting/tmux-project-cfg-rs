@@ -1,6 +1,6 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::{SplitWindow, SelectPane, TmuxInterface, Panes};
+use self::tmux_interface::{Panes, SelectPane, SplitWindow, TmuxInterface};
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
 use std::collections::BTreeMap;

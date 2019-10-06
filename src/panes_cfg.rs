@@ -1,8 +1,8 @@
 extern crate tmux_interface;
 
+use self::tmux_interface::Panes;
 use super::error::Error;
 use super::pane_cfg::{PaneCfg, PaneOptionsCfg};
-use self::tmux_interface::Panes;
 
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PanesCfg(Vec<PaneCfg>);

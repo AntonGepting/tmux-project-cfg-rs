@@ -8,8 +8,7 @@ use super::sessions_cfg::SessionsCfg;
 use std::fs;
 use std::path::PathBuf;
 
-use self::tmux_interface::AttachSession;
-use self::tmux_interface::TmuxInterface;
+use self::tmux_interface::{AttachSession, TmuxInterface};
 
 // TODO: #[skip_serializing_null] added in new serde
 // XXX: cant use borrowed values [link](https://github.com/dtolnay/serde-yaml/issues/94)
@@ -31,6 +30,7 @@ pub struct ProjectCfg {
     pub sessions: Option<SessionsCfg>,
 }
 
+// XXX: mb optional user defined serializer support (json, toml, yml)?
 impl ProjectCfg {
     pub fn new() -> Self {
         Default::default()

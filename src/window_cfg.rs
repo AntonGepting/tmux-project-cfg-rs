@@ -1,9 +1,9 @@
 extern crate tmux_interface;
 
-use super::panes_cfg::PanesCfg;
-use super::pane_cfg::PaneCfg;
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
+use super::pane_cfg::PaneCfg;
+use super::panes_cfg::PanesCfg;
 
 use self::tmux_interface::{NewWindow, SelectWindow, TmuxInterface};
 
@@ -112,7 +112,7 @@ impl WindowCfg {
         unimplemented!();
     }
 
-    pub fn select(target_window: &str) -> Result<(), Error>{
+    pub fn select(target_window: &str) -> Result<(), Error> {
         let tmux = TmuxInterface::new();
         let select_window = SelectWindow {
             target_window: Some(target_window),
