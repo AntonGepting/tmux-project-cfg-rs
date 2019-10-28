@@ -1,6 +1,6 @@
 # tmux_project_cfg
 
-<!--[![Build Status](https://travis-ci.com/AntonGepting/tmux-project-cfg-rs.svg?branch=master)](https://travis-ci.com/AntonGepting/tmux-project-cfg-rs)-->
+[![Build Status](https://travis-ci.com/AntonGepting/tmux-project-cfg-rs.svg?branch=master)](https://travis-ci.com/AntonGepting/tmux-project-cfg-rs)
 <!--[![Crates.io](https://img.shields.io/crates/v/tmux_interface.svg)](https://crates.io/crates/tmux_interface)-->
 <!--[![Documentation](https://docs.rs/tmux_interface/badge.svg)](https://docs.rs/tmux_interface)-->
 
