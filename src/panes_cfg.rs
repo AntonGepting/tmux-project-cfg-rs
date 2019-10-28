@@ -7,18 +7,9 @@ use super::pane_cfg::{PaneCfg, PaneOptionsCfg};
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PanesCfg(Vec<PaneCfg>);
 
-//impl IntoIterator for PanesCfg {
-//type Item = HashMap<String, Option<PaneCfg>>;
-//type IntoIter = ::std::vec::IntoIter<Self::Item>;
-
-//fn into_iter(self) -> Self::IntoIter {
-//self.0.into_iter()
-//}
-//}
-//
-
 // %id
 impl PanesCfg {
+    // XXX: use of an array &[PaneCfg]
     pub fn new() -> Self {
         Default::default()
     }
@@ -27,28 +18,50 @@ impl PanesCfg {
         self.0.push(pane)
     }
 
-    pub fn get(target_window: &str) -> Result<PanesCfg, Error> {
+    // TODO: Some, None
+    pub fn get(target_window: &str, bitflags: usize) -> Option<PanesCfg> {
         let mut panes_cfg = PanesCfg::new();
         let mut _pane_cfg: PaneCfg;
 
-        let panes = Panes::get(target_window)?;
-        for pane in panes {
-            let options = PaneOptionsCfg {
-                index: pane.index,
-                cwd: pane.current_path,
-                shell_command: pane.current_command,
-                active: pane.active,
-                ..Default::default()
-            };
-            // XXX: is title set? otherwise then number
-            let pane_cfg = PaneCfg::new(pane.title.unwrap(), Some(options));
-            panes_cfg.push(pane_cfg);
+        let panes = Panes::get(target_window, bitflags).ok();
+        if let Some(panes) = panes {
+            if !panes.0.is_empty() {
+                for pane in panes {
+                    let mut options = PaneOptionsCfg {
+                        // detached by default
+                        //detached: Some(true),
+                        cwd: pane.current_path,
+                        ..Default::default()
+                    };
+
+                    // do not save inactive status (inactive by default)
+                    if pane.active.unwrap_or(false) {
+                        options.active = pane.active;
+                    }
+
+                    // split horizontal if pane doesn't touch left border (assume by default: !true)
+                    if !pane.at_left.unwrap_or(true) {
+                        options.horizontal = Some(true);
+                        options.size = pane.width;
+                    // split vertical if pane doesn't touch top border (assume by default: !true)
+                    } else if !pane.at_top.unwrap_or(true) {
+                        options.vertical = Some(true);
+                        options.size = pane.height;
+                    }
+
+                    // XXX: is title set? otherwise then number
+                    let pane_cfg = PaneCfg::new(pane.index.unwrap().to_string(), Some(options));
+                    panes_cfg.push(pane_cfg);
+                }
+                return Some(panes_cfg);
+            }
         }
-        Ok(panes_cfg)
+        None
     }
 
     // TODO: defaults if needed
-    pub fn create(&self, target_window: &str) -> Result<(), Error> {
+    pub fn create(&self, target_window: &str) -> Result<Vec<usize>, Error> {
+        let mut ids = Vec::new();
         for (i, pane_cfg) in self.0.iter().enumerate() {
             // if first pane different behavior (tmux creates one by creating a window)
             let (_key, first_value) = pane_cfg.0.iter().next().unwrap();
@@ -59,7 +72,8 @@ impl PanesCfg {
                     send_keys.send(&target_pane_str)?;
                 }
             } else {
-                pane_cfg.create(target_window)?;
+                let id = pane_cfg.create(target_window)?;
+                ids.push(id);
             }
             //if let Some(ref session_name) = map.keys().next() {
             //if let Some(ref start_directory) = self.start_directory {
@@ -72,6 +86,6 @@ impl PanesCfg {
             //self.attach = session.session_name;
             ////}
         }
-        Ok(())
+        Ok(ids)
     }
 }

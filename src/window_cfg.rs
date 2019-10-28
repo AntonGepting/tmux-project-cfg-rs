@@ -5,7 +5,7 @@ use super::keys_cfg::KeysCfg;
 use super::pane_cfg::PaneCfg;
 use super::panes_cfg::PanesCfg;
 
-use self::tmux_interface::{NewWindow, SelectWindow, TmuxInterface};
+use self::tmux_interface::{NewWindow, SelectWindow, TmuxInterface, Windows};
 
 use std::collections::BTreeMap;
 
@@ -92,7 +92,7 @@ impl WindowCfg {
             panes = value.panes.as_ref();
             select_pane = value.select_pane;
         }
-        let output = tmux.new_window(new_window)?;
+        let output = tmux.new_window(Some(&new_window))?;
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
         //let target_window_str = format!("{}.%{}", target_window, id);
@@ -117,7 +117,7 @@ impl WindowCfg {
             target_window: Some(target_window),
             ..Default::default()
         };
-        tmux.select_window(&select_window)?;
+        tmux.select_window(Some(&select_window))?;
         Ok(())
     }
 
@@ -125,6 +125,32 @@ impl WindowCfg {
         let tmux = TmuxInterface::new();
         tmux.rename_window(Some(target_window), new_name)?;
         Ok(())
+    }
+
+    // mb filter?
+    pub fn get(
+        target_session: &str,
+        window_id: usize,
+        wbitflags: usize,
+        pbitflags: usize,
+    ) -> Result<WindowCfg, Error> {
+        let windows = Windows::get(target_session, wbitflags)?;
+        for window in windows {
+            if window.id == Some(window_id) {
+                let panes_cfg = PanesCfg::get(&window.clone().name.unwrap(), pbitflags);
+                // TODO: none if not given bitflags
+                let options = WindowOptionsCfg {
+                    //detached: pane.detached,
+                    active: window.active,
+                    //index: window.index,
+                    panes: panes_cfg,
+                    ..Default::default()
+                };
+                let window_cfg = WindowCfg::new(window.name.unwrap(), Some(options));
+                return Ok(window_cfg);
+            }
+        }
+        Err(Error::new("window not found?!"))
     }
 }
 

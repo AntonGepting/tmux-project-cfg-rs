@@ -6,46 +6,50 @@ use super::keys_cfg::KeysCfg;
 use std::collections::BTreeMap;
 //use super::panes_cfg::PanesCfg;
 
-#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
-pub struct PaneCfg(pub BTreeMap<String, Option<PaneOptionsCfg>>);
-
 // TODO: #[skip_serializing_null] added in new serde
 // XXX: cant use borrowed values [link](https://github.com/dtolnay/serde-yaml/issues/94)
 #[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
 pub struct PaneOptionsCfg {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub parent: Option<String>,
+    pub active: Option<bool>, // set: SelectPane.?; get: Pane.active
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub before: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub index: Option<usize>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub detached: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub full_window: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub vertical: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub horizontal: Option<bool>,
+    pub before: Option<bool>, // set: SplitWindow.before; get:
     //#[serde(skip_serializing_if = "Option::is_none")]
-    //pub print: Option<bool>,
+    //pub index: Option<usize>, // set: - ; get: Pane.index
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cwd: Option<String>,
+    pub detached: Option<bool>, // set: SplitWindow.detached; get: ? (derive Pane.active?)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub size: Option<usize>,
+    pub full_window: Option<bool>, // set: SplitWindow.full; get:
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub percentage: Option<usize>,
+    pub vertical: Option<bool>, // set: SplitWindow.vertical; get: ? (Pane.at_left, .at_bottom, .at_top, .at_right)
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub target_pane: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub shell_command: Option<String>,
+    pub horizontal: Option<bool>, // set: SplitWindow.horizontal; get: ? (Pane.at_left, .at_bottom, .at_top, .at_right)
     //#[serde(skip_serializing_if = "Option::is_none")]
-    //pub format: Option<String>,
+    //pub print: Option<bool>, // set: SplitWindow.print; get:
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub send_keys: Option<KeysCfg>,
+    pub cwd: Option<String>, // set: SplitWindow.cwd; get: Pane.current_path
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub active: Option<bool>,
+    pub size: Option<usize>, // set: SplitWindow.size; get: Pane.width or Pane.height
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub percentage: Option<usize>, // set: SplitWindow.percentage; get: ? (calculate?)
+    //#[serde(skip_serializing_if = "Option::is_none")]
+    //pub target_pane: Option<String>, // set: SplitWindow.target_pane; get:
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shell_command: Option<String>, // set: SplitWindow.shell_command; get: Pane.start_command
+    //#[serde(skip_serializing_if = "Option::is_none")]
+    //pub format: Option<String>, // set: SplitWindow.format; get: -
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub send_keys: Option<KeysCfg>, // set: SendKeys; get: ? (derive Pane.current_command?)
 }
+
+impl PaneOptionsCfg {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
+pub struct PaneCfg(pub BTreeMap<String, Option<PaneOptionsCfg>>);
 
 // %id
 impl PaneCfg {
@@ -56,73 +60,91 @@ impl PaneCfg {
     }
 
     pub fn create(&self, target_window: &str) -> Result<usize, Error> {
-        let tmux = TmuxInterface::new();
-        // XXX: make it
-        //let target_index = self.index.unwrap();
-        // assumed: pane numbers always begin with 0
-        //let target_pane_str = format!("{}.{}", target_window, target_index - 1);
+        // target pane is next (+1) from current
         let target_pane_str = format!("{}.+1", target_window);
+        // init new pane struct
         let mut split_window = SplitWindow {
-            detached: Some(true),
             print: Some(true),
             format: Some("#{pane_id}"),
             ..Default::default()
         };
-        let (_key, first_value) = self.0.iter().next().unwrap();
+        // init tmux interface
+        let tmux = TmuxInterface::new();
+        // init send keys struct
         let mut send_keys = None;
+        // extract values from map
+        let (_key, first_value) = self.0.iter().next().unwrap();
         if let Some(value) = first_value {
             split_window.before = value.before;
-            split_window.detached = value.detached;
+            // default all panes detached
+            split_window.detached = Some(value.detached.unwrap_or(true));
             split_window.full = value.full_window;
             split_window.horizontal = value.horizontal;
             split_window.vertical = value.vertical;
-            split_window.print = Some(true);
             split_window.cwd = value.cwd.as_ref().map(|s| s.as_str());
             split_window.size = value.size;
             split_window.percentage = value.percentage;
             split_window.target_pane = Some(&target_pane_str);
             split_window.shell_command = value.shell_command.as_ref().map(|s| s.as_str());
-            split_window.format = Some("#{pane_id}");
             send_keys = value.send_keys.clone();
         }
-        let output = tmux.split_window(&split_window)?;
+        // create this pane
+        let output = tmux.split_window(Some(&split_window))?;
+        // get new created pane id
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
         let target_pane_str = format!("{}.%{}", target_window, id);
+        // send keys to this pane by id
         send_keys.and_then(|k| k.send(&target_pane_str).ok());
         Ok(id)
     }
 
     pub fn select(target_pane: &str) -> Result<(), Error> {
+        // init tmux interface
         let tmux = TmuxInterface::new();
+        // init select pane struct
         let select_pane = SelectPane {
             target_pane: Some(target_pane),
             ..Default::default()
         };
-        tmux.select_pane(&select_pane)?;
+        // select pane
+        tmux.select_pane(Some(&select_pane))?;
         Ok(())
     }
 
-    pub fn get(target_window: &str, pane_id: usize) -> Result<PaneCfg, Error> {
-        let tmux = TmuxInterface::new();
-        let panes = Panes::get(target_window)?;
+    // XXX: Optimize/merge with panes_cfg::get_pane()?
+    pub fn get(target_window: &str, pane_id: usize, bitflags: usize) -> Result<PaneCfg, Error> {
+        // NOTE: not possible to get only a single pane?
+        // get all panes
+        let panes = Panes::get(target_window, bitflags)?;
+        // save pane if found by id
         for pane in panes {
             if pane.id == Some(pane_id) {
-                let options = PaneOptionsCfg {
-                    //detached: pane.detached,
-                    index: pane.index,
+                // init pane options struct
+                let mut options = PaneOptionsCfg {
+                    cwd: pane.current_path,
                     ..Default::default()
                 };
-                let pane_cfg = PaneCfg::new(pane.title.unwrap(), Some(options));
+                // save active status of the pane
+                // do not save inactive status (inactive by default)
+                if pane.active.unwrap_or(false) {
+                    options.active = pane.active;
+                }
+                // split horizontal if pane doesn't touch left border (assume by default: !true)
+                if !pane.at_left.unwrap_or(true) {
+                    options.horizontal = Some(true);
+                    options.size = pane.width;
+                // split vertical if pane doesn't touch top border (assume by default: !true)
+                } else if !pane.at_top.unwrap_or(true) {
+                    options.vertical = Some(true);
+                    options.size = pane.height;
+                }
+                // init and return this pane
+                let pane_cfg = PaneCfg::new(pane.index.unwrap().to_string(), Some(options));
                 return Ok(pane_cfg);
             }
         }
-        Err(Error::new("iasdfsdf"))
-    }
-}
-
-impl PaneOptionsCfg {
-    pub fn new() -> Self {
-        Default::default()
+        // TODO: set right error
+        Err(Error::new("pane not found?!"))
     }
 }

@@ -4,15 +4,6 @@ use super::session_cfg::SessionCfg;
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SessionsCfg(Vec<SessionCfg>);
 
-//impl IntoIterator for SessionsCfg {
-//type Item = SessionCfg;
-//type IntoIter = ::std::vec::IntoIter<Self::Item>;
-
-//fn into_iter(self) -> Self::IntoIter {
-//self.0.into_iter()
-//}
-//}
-
 // $id
 impl SessionsCfg {
     pub fn new() -> Self {
@@ -25,16 +16,16 @@ impl SessionsCfg {
 
     // TODO: defaults if needed
     // TODO: Result
-    // XXX: clone() - really needed?
-    pub fn create(&self) -> Result<(), Error> {
+    pub fn create(&self) -> Result<Vec<usize>, Error> {
+        let mut ids = Vec::new();
         for session_cfg in &self.0 {
-            //if let Some(session) = session_cfg.values().next().unwrap_or(&None) {
             //if let Some(ref start_directory) = self.start_directory {
             //session.cwd = Some(start_directory.to_string());
             //}
 
             if !session_cfg.exists()? {
-                session_cfg.create()?;
+                let id = session_cfg.create()?;
+                ids.push(id);
             } else {
                 //error!("{}: ", LOG_SESSIONS_CFG_SESSION_ALREADY_EXISTS);
             }
@@ -43,7 +34,7 @@ impl SessionsCfg {
             //self.attach = session.session_name;
             //}
         }
-        Ok(())
+        Ok(ids)
     }
 
     // TODO: Result
@@ -56,11 +47,18 @@ impl SessionsCfg {
         Ok(())
     }
 
-    pub fn get(sessions_names: Vec<&str>) -> Result<SessionsCfg, Error> {
+    // XXX: struct bitflags
+    // XXX: project bitflags
+    pub fn get(
+        sessions_names: &Vec<&str>,
+        sbitflags: usize,
+        wbitflags: usize,
+        pbitflags: usize,
+    ) -> Result<SessionsCfg, Error> {
         let mut sessions_cfg = SessionsCfg::new();
         let mut session_cfg: SessionCfg;
         for session_name in sessions_names {
-            session_cfg = SessionCfg::get(session_name)?;
+            session_cfg = SessionCfg::get(session_name, sbitflags, wbitflags, pbitflags)?;
             sessions_cfg.push(session_cfg);
         }
         Ok(sessions_cfg)

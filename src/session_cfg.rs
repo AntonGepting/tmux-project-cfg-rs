@@ -5,14 +5,11 @@ extern crate tmux_interface;
 use self::tmux_interface::{AttachSession, NewSession, SelectWindow, Sessions, TmuxInterface};
 //use super::keys::KeysCfg;
 
-//use std::collections::HashMap;
-//use std::process::Command;
-
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
 use super::windows_cfg::WindowsCfg;
+use crate::SESSION_NAME;
 use std::collections::BTreeMap;
-//use super::tmux::*;
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SessionCfg(pub BTreeMap<String, Option<SessionOptionsCfg>>);
@@ -115,7 +112,7 @@ impl SessionCfg {
             select_window = value.select_window.as_ref();
         };
         let tmux = TmuxInterface::new();
-        let output = tmux.new_session(&new_session)?;
+        let output = tmux.new_session(Some(&new_session))?;
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
 
@@ -128,19 +125,24 @@ impl SessionCfg {
                 target_window: Some(&select_window),
                 ..Default::default()
             };
-            tmux.select_window(&select_window)?;
+            tmux.select_window(Some(&select_window))?;
         }
 
         Ok(id)
     }
 
-    pub fn get(session_name: &str) -> Result<SessionCfg, Error> {
+    pub fn get(
+        session_name: &str,
+        sbitflags: usize,
+        wbitflags: usize,
+        pbitflags: usize,
+    ) -> Result<SessionCfg, Error> {
         let tmux = TmuxInterface::new();
         if tmux.has_session(Some(session_name))? {
-            let sessions = Sessions::get()?;
+            let sessions = Sessions::get(sbitflags | SESSION_NAME)?;
             for session in sessions {
                 if session.name == Some(session_name.to_string()) {
-                    let windows_cfg = WindowsCfg::get(session_name).ok();
+                    let windows_cfg = WindowsCfg::get(session_name, wbitflags, pbitflags).ok();
                     let options = SessionOptionsCfg {
                         activity: session.activity.map(|t| t.as_millis()),
                         created: session.created.map(|t| t.as_millis()),
@@ -167,10 +169,11 @@ impl SessionCfg {
     pub fn attach(&self) -> Result<(), Error> {
         let session_name = self.get_name();
         let attach_session = AttachSession {
+            target_session: session_name,
             ..Default::default()
         };
         let tmux = TmuxInterface::new();
-        tmux.attach_session(&attach_session)?;
+        tmux.attach_session(Some(&attach_session))?;
         Ok(())
     }
 

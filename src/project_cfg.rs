@@ -73,14 +73,19 @@ impl ProjectCfg {
                 target_session: self.attach.as_ref().map(|s| s.as_ref()),
                 ..Default::default()
             };
-            tmux.attach_session(&attach_session)?;
+            tmux.attach_session(Some(&attach_session))?;
         }
         Ok(())
     }
 
-    pub fn get(sessions_names: Vec<&str>) -> Result<ProjectCfg, Error> {
+    pub fn get(
+        sessions_names: &Vec<&str>,
+        sbitflags: usize,
+        wbitflags: usize,
+        pbitflags: usize,
+    ) -> Result<ProjectCfg, Error> {
         let mut project = ProjectCfg::new();
-        let sessions_cfg = SessionsCfg::get(sessions_names)?;
+        let sessions_cfg = SessionsCfg::get(&sessions_names, sbitflags, wbitflags, pbitflags)?;
         project.sessions = Some(sessions_cfg);
         Ok(project)
     }
