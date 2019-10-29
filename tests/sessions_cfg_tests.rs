@@ -1,7 +1,6 @@
 #[test]
 fn sessions_create() {
-    use tmux_project_cfg::session_cfg::SessionCfg;
-    use tmux_project_cfg::session_cfg::SessionOptionsCfg;
+    use tmux_project_cfg::session_cfg::{SessionCfg, SessionOptionsCfg};
     use tmux_project_cfg::sessions_cfg::SessionsCfg;
 
     let session1_cfg = SessionCfg::new(
@@ -65,5 +64,4 @@ fn sessions_from_str() {
 //let sessions_cfg =
 //SessionsCfg::get(&sessions_names, SESSION_NONE, WINDOW_NONE, PANE_NONE).unwrap();
 //let sessions_str = serde_yaml::to_string(&sessions_cfg).unwrap();
-//print!("{}", sessions_str);
 //}

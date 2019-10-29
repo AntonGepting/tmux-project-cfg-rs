@@ -101,8 +101,7 @@ fn windows_get() {
 
     let windows_cfg = WindowsCfg::get("0", WINDOW_ALL, PANE_ALL).unwrap();
     let windows_str = serde_yaml::to_string(&windows_cfg).unwrap();
-    print!("{}", windows_str);
-
+    //print!("{}", windows_str);
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 }

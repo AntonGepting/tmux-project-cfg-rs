@@ -52,7 +52,6 @@ fn session_get() {
 
     let session_cfg = SessionCfg::get("0", SESSION_NONE, WINDOW_ALL, PANE_ALL).unwrap();
     let session_str = serde_yaml::to_string(&session_cfg).unwrap();
-    print!("{}", session_str);
     let tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();

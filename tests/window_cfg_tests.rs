@@ -1,8 +1,7 @@
 #[test]
 fn window_create() {
     use tmux_interface::{NewSession, TmuxInterface};
-    use tmux_project_cfg::window_cfg::WindowCfg;
-    use tmux_project_cfg::window_cfg::WindowOptionsCfg;
+    use tmux_project_cfg::window_cfg::{WindowCfg, WindowOptionsCfg};
 
     const TEST_SESSION_NAME: &'static str = "window_create";
 

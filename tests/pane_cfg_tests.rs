@@ -1,8 +1,7 @@
 #[test]
 fn pane_create() {
     use tmux_interface::{NewSession, TmuxInterface};
-    use tmux_project_cfg::pane_cfg::PaneCfg;
-    use tmux_project_cfg::pane_cfg::PaneOptionsCfg;
+    use tmux_project_cfg::pane_cfg::{PaneCfg, PaneOptionsCfg};
 
     const TEST_SESSION_NAME: &'static str = "pane_create";
 
@@ -78,7 +77,7 @@ fn pane_create_from_str() {
 //};
 
 //tmux.new_session(Some(&new_session)).unwrap();
-//let pane_cfg = PaneCfg::get(&format!("{}:1", TEST_SESSION_NAME), 1, PANE_ALL).unwrap();
+//let pane_cfg = PaneCfg::get(&format!("{}:1", TEST_SESSION_NAME), 0, PANE_ALL).unwrap();
 //let pane_str = serde_yaml::to_string(&pane_cfg).unwrap();
 //dbg!(pane_str);
 //tmux.kill_session(None, None, Some(TEST_SESSION_NAME))

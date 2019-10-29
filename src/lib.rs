@@ -30,7 +30,7 @@ pub use self::windows_cfg::WindowsCfg;
 //mod window_cfg_tests;
 //mod windows_cfg_tests;
 ////mod keys_cfg_tests;
-mod error_tests;
+//mod error_tests;
 
 pub const PANE_ACTIVE: usize = tmux_interface::pane::PANE_ACTIVE;
 pub const PANE_AT_BOTTOM: usize = tmux_interface::pane::PANE_AT_BOTTOM;
