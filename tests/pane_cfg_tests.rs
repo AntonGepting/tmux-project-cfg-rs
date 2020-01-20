@@ -53,7 +53,7 @@ fn pane_create_from_str() {
 
     let pane_cfg: PaneCfg = serde_yaml::from_str(&pane_str).unwrap();
     let id = pane_cfg
-        .create(&format!("{}:0", TEST_SESSION_NAME))
+        .create(&format!("{}:1", TEST_SESSION_NAME))
         .unwrap();
 
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
