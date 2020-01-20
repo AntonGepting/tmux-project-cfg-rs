@@ -3,3 +3,9 @@ rust:
   - stable
   - beta
   - nightly
+
+script:
+  #- cargo build --verbose
+  #- cargo test --verbose
+  - cargo build --features tmux_2_6 --verbose
+  - cargo test --features tmux_2_6 --verbose -- --nocapture
