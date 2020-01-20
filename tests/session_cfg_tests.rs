@@ -35,6 +35,7 @@ fn session_create_from_str() {
     "#;
     let session_cfg: SessionCfg = serde_yaml::from_str(session_str).unwrap();
     let id = session_cfg.create().unwrap();
+    println!("{}", id);
     let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
