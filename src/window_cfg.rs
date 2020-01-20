@@ -65,7 +65,7 @@ impl WindowCfg {
     }
 
     pub fn create(self, target_session: &str, target_window: usize) -> Result<usize, Error> {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         let target_window_str = format!("{}:{}", &target_session, target_window);
         let mut new_window = NewWindow {
             detached: Some(true),
@@ -112,7 +112,7 @@ impl WindowCfg {
     }
 
     pub fn select(target_window: &str) -> Result<(), Error> {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         let select_window = SelectWindow {
             target_window: Some(target_window),
             ..Default::default()
@@ -122,7 +122,7 @@ impl WindowCfg {
     }
 
     pub fn rename(&self, target_window: &str, new_name: &str) -> Result<(), Error> {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         tmux.rename_window(Some(target_window), new_name)?;
         Ok(())
     }

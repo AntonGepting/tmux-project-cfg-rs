@@ -6,7 +6,7 @@ fn windows_create() {
 
     const TEST_SESSION_NAME: &'static str = "windows_create";
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -56,7 +56,7 @@ fn windows_from_str() {
 
     const TEST_SESSION_NAME: &'static str = "windows_create_from_str";
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -91,7 +91,7 @@ fn windows_get() {
 
     const TEST_SESSION_NAME: &'static str = "windows_get";
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),

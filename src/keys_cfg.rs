@@ -32,18 +32,17 @@ impl KeysCfg {
     }
 
     pub fn send(&self, target_pane: &str) -> Result<(), Error> {
-        let mut send_keys = Vec::new();
-        if let Some(keys) = &self.keys {
-            send_keys = keys.iter().map(|k| k.as_ref()).collect();
+        let mut keys = Vec::new();
+        if let Some(key) = &self.keys {
+            keys = key.iter().map(|k| k.as_ref()).collect();
         }
         let send_keys = SendKeys {
             target_pane: Some(target_pane),
-            key: send_keys,
             ..Default::default()
         };
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         //tmux.tmux = Some("tmux.sh");
-        tmux.send_keys(&send_keys)?;
+        tmux.send_keys(Some(&send_keys), &keys)?;
         Ok(())
     }
 }

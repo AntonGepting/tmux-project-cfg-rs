@@ -1,6 +1,6 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::{Panes, SelectPane, SplitWindow, TmuxInterface};
+use self::tmux_interface::{PaneSize, Panes, SelectPane, SplitWindow, TmuxInterface};
 use super::error::Error;
 use super::keys_cfg::KeysCfg;
 use std::collections::BTreeMap;
@@ -69,7 +69,8 @@ impl PaneCfg {
             ..Default::default()
         };
         // init tmux interface
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
+        tmux.tmux = Some("./tmux_mock.sh");
         // init send keys struct
         let mut send_keys = None;
         // extract values from map
@@ -82,14 +83,19 @@ impl PaneCfg {
             split_window.horizontal = value.horizontal;
             split_window.vertical = value.vertical;
             split_window.cwd = value.cwd.as_ref().map(|s| s.as_str());
-            split_window.size = value.size;
-            split_window.percentage = value.percentage;
+            if let Some(size) = value.size {
+                split_window.size = Some(PaneSize::Size(size));
+            };
+            if let Some(percentage) = value.percentage {
+                split_window.size = Some(PaneSize::Percentage(percentage));
+            };
             split_window.target_pane = Some(&target_pane_str);
             split_window.shell_command = value.shell_command.as_ref().map(|s| s.as_str());
             send_keys = value.send_keys.clone();
         }
         // create this pane
         let output = tmux.split_window(Some(&split_window))?;
+        dbg!("output: {}", &output);
         // get new created pane id
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
@@ -101,7 +107,7 @@ impl PaneCfg {
 
     pub fn select(target_pane: &str) -> Result<(), Error> {
         // init tmux interface
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         // init select pane struct
         let select_pane = SelectPane {
             target_pane: Some(target_pane),

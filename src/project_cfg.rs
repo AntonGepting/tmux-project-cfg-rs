@@ -68,7 +68,7 @@ impl ProjectCfg {
 
     pub fn attach(&self) -> Result<(), Error> {
         if !self.detached.unwrap_or(false) && self.attach.is_some() {
-            let tmux = TmuxInterface::new();
+            let mut tmux = TmuxInterface::new();
             let attach_session = AttachSession {
                 target_session: self.attach.as_ref().map(|s| s.as_ref()),
                 ..Default::default()

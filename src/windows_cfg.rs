@@ -61,7 +61,7 @@ impl WindowsCfg {
         wbitflags: usize,
         pbitflags: usize,
     ) -> Result<WindowsCfg, Error> {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         let mut windows_cfg = WindowsCfg::new();
         let mut window_cfg: WindowCfg;
         if tmux.has_session(Some(target_session))? {

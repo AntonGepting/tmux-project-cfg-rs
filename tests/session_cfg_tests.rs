@@ -14,7 +14,7 @@ fn session_create() {
         }),
     );
     let id = session_cfg.create().unwrap();
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 
@@ -35,7 +35,7 @@ fn session_create_from_str() {
     "#;
     let session_cfg: SessionCfg = serde_yaml::from_str(session_str).unwrap();
     let id = session_cfg.create().unwrap();
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 
@@ -52,7 +52,7 @@ fn session_get() {
 
     let session_cfg = SessionCfg::get("0", SESSION_NONE, WINDOW_ALL, PANE_ALL).unwrap();
     let session_str = serde_yaml::to_string(&session_cfg).unwrap();
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 }

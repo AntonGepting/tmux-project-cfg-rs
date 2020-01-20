@@ -5,7 +5,7 @@ fn window_create() {
 
     const TEST_SESSION_NAME: &'static str = "window_create";
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -32,7 +32,7 @@ fn window_create_from_str() {
 
     const TEST_SESSION_NAME: &'static str = "window_create_from_str";
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),

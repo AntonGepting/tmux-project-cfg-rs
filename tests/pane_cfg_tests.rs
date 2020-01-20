@@ -11,7 +11,7 @@ fn pane_create() {
     };
     let pane_cfg = PaneCfg::new("test_pane".to_string(), Some(options));
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -43,7 +43,7 @@ fn pane_create_from_str() {
             send_keys:
             keys: ["top"]
         "#;
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -53,7 +53,7 @@ fn pane_create_from_str() {
 
     let pane_cfg: PaneCfg = serde_yaml::from_str(&pane_str).unwrap();
     let id = pane_cfg
-        .create(&format!("{}:1", TEST_SESSION_NAME))
+        .create(&format!("{}:0", TEST_SESSION_NAME))
         .unwrap();
 
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))

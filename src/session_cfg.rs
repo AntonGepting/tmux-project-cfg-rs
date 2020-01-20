@@ -111,7 +111,7 @@ impl SessionCfg {
             windows = value.windows.as_ref();
             select_window = value.select_window.as_ref();
         };
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         let output = tmux.new_session(Some(&new_session))?;
         let output_parts: Vec<&str> = output.split('\n').collect();
         let id = output_parts[0][1..].parse::<usize>()?;
@@ -137,7 +137,7 @@ impl SessionCfg {
         wbitflags: usize,
         pbitflags: usize,
     ) -> Result<SessionCfg, Error> {
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         if tmux.has_session(Some(session_name))? {
             let sessions = Sessions::get(sbitflags | SESSION_NAME)?;
             for session in sessions {
@@ -162,7 +162,7 @@ impl SessionCfg {
     // XXX: Option instead of result?
     pub fn exists(&self) -> Result<bool, Error> {
         let session_name = self.get_name();
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         Ok(tmux.has_session(session_name)?)
     }
 
@@ -172,21 +172,21 @@ impl SessionCfg {
             target_session: session_name,
             ..Default::default()
         };
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         tmux.attach_session(Some(&attach_session))?;
         Ok(())
     }
 
     pub fn kill(&self) -> Result<(), Error> {
         let session_name = self.get_name();
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         tmux.kill_session(None, None, session_name)?;
         Ok(())
     }
 
     pub fn rename(&self, new_name: &str) -> Result<(), Error> {
         let session_name = self.get_name();
-        let tmux = TmuxInterface::new();
+        let mut tmux = TmuxInterface::new();
         tmux.rename_session(session_name, new_name)?;
         Ok(())
     }

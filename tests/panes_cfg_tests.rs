@@ -32,7 +32,7 @@ fn panes_create() {
     panes_cfg.push(pane2_cfg);
     panes_cfg.push(pane3_cfg);
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -81,7 +81,7 @@ fn panes_create_from_str() {
     "#;
     let panes_cfg: PanesCfg = serde_yaml::from_str(pane_str).unwrap();
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
@@ -136,7 +136,7 @@ fn panes_get() {
     panes_cfg_orig.push(pane2_cfg);
     panes_cfg_orig.push(pane3_cfg);
 
-    let tmux = TmuxInterface::new();
+    let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
         session_name: Some(TEST_SESSION_NAME),
