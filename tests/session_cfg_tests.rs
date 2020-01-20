@@ -14,6 +14,7 @@ fn session_create() {
         }),
     );
     let id = session_cfg.create().unwrap();
+    println!("session_create: {}", id);
     let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
@@ -35,7 +36,7 @@ fn session_create_from_str() {
     "#;
     let session_cfg: SessionCfg = serde_yaml::from_str(session_str).unwrap();
     let id = session_cfg.create().unwrap();
-    println!("{}", id);
+    println!("session_create_from_str: {}", id);
     let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
