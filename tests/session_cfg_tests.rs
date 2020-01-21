@@ -19,7 +19,7 @@ fn session_create() {
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 
-    assert!(id > 0);
+    assert!(id >= 0);
 }
 
 #[test]
