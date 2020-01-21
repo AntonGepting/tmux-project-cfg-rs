@@ -52,9 +52,10 @@ fn session_get() {
             ..Default::default()
         }),
     );
-    assert!(session_cfg.create().is_ok());
+    let id = session_cfg.create().unwrap();
     let mut tmux = TmuxInterface::new();
-    let session_cfg = SessionCfg::get("0", SESSION_NONE, WINDOW_ALL, PANE_ALL).unwrap();
+    let session_cfg =
+        SessionCfg::get(&format!("{}", id), SESSION_NONE, WINDOW_ALL, PANE_ALL).unwrap();
     let session_str = serde_yaml::to_string(&session_cfg).unwrap();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
