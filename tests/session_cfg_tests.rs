@@ -13,13 +13,10 @@ fn session_create() {
             ..Default::default()
         }),
     );
-    let id = session_cfg.create().unwrap();
-    println!("session_create: {}", id);
+    assert!(session_cfg.create().is_ok());
     let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    assert!(id >= 0);
 }
 
 #[test]
@@ -35,13 +32,10 @@ fn session_create_from_str() {
         detached: true
     "#;
     let session_cfg: SessionCfg = serde_yaml::from_str(session_str).unwrap();
-    let id = session_cfg.create().unwrap();
-    println!("session_create_from_str: {}", id);
+    assert!(session_cfg.create().is_ok());
     let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    assert!(id > 0);
 }
 
 #[test]
