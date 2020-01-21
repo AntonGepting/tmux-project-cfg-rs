@@ -28,11 +28,8 @@ fn sessions_create() {
     sessions_cfg.push(session1_cfg);
     sessions_cfg.push(session2_cfg);
     sessions_cfg.push(session3_cfg);
-    let ids = sessions_cfg.create().unwrap();
+    assert!(sessions_cfg.create().is_ok());
     sessions_cfg.kill().unwrap();
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 #[test]
@@ -48,11 +45,8 @@ fn sessions_from_str() {
           detached: true
     "#;
     let sessions_cfg: SessionsCfg = serde_yaml::from_str(sessions_str).unwrap();
-    let ids = sessions_cfg.create().unwrap();
+    assert!(sessions_cfg.create().is_ok());
     sessions_cfg.kill().unwrap();
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 //#[test]

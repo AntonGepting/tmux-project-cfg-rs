@@ -1,8 +1,7 @@
 #[test]
 fn session_create() {
     use tmux_interface::TmuxInterface;
-    use tmux_project_cfg::session_cfg::SessionCfg;
-    use tmux_project_cfg::session_cfg::SessionOptionsCfg;
+    use tmux_project_cfg::session_cfg::{SessionCfg, SessionOptionsCfg};
 
     const TEST_SESSION_NAME: &'static str = "session_create";
 
@@ -41,14 +40,22 @@ fn session_create_from_str() {
 #[test]
 fn session_get() {
     use tmux_interface::TmuxInterface;
-    use tmux_project_cfg::session_cfg::SessionCfg;
+    use tmux_project_cfg::session_cfg::{SessionCfg, SessionOptionsCfg};
     use tmux_project_cfg::{PANE_ALL, SESSION_ALL, SESSION_NONE, WINDOW_ALL};
 
     const TEST_SESSION_NAME: &'static str = "session_get";
 
+    let session_cfg = SessionCfg::new(
+        TEST_SESSION_NAME.to_string(),
+        Some(SessionOptionsCfg {
+            detached: Some(true),
+            ..Default::default()
+        }),
+    );
+    assert!(session_cfg.create().is_ok());
+    let mut tmux = TmuxInterface::new();
     let session_cfg = SessionCfg::get("0", SESSION_NONE, WINDOW_ALL, PANE_ALL).unwrap();
     let session_str = serde_yaml::to_string(&session_cfg).unwrap();
-    let mut tmux = TmuxInterface::new();
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 }
