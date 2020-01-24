@@ -70,7 +70,7 @@ impl PaneCfg {
         };
         // init tmux interface
         let mut tmux = TmuxInterface::new();
-        tmux.tmux = Some("./tmux_mock.sh");
+        //tmux.tmux = Some("./tmux_mock.sh");
         // init send keys struct
         let mut send_keys = None;
         // extract values from map
