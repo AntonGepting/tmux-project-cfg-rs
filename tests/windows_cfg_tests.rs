@@ -73,25 +73,24 @@ fn windows_create_from_str() {
         .unwrap();
 }
 
-//#[test]
-//fn windows_get() {
-//use tmux_interface::{NewSession, TmuxInterface};
-//use tmux_project_cfg::windows_cfg::WindowsCfg;
-//use tmux_project_cfg::{PANE_ALL, WINDOW_ALL};
+#[test]
+fn windows_get() {
+    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_project_cfg::windows_cfg::WindowsCfg;
+    use tmux_project_cfg::{PANE_ALL, WINDOW_ALL};
 
-//const TEST_SESSION_NAME: &'static str = "windows_get";
+    const TEST_SESSION_NAME: &'static str = "windows_get";
 
-//let mut tmux = TmuxInterface::new();
-//let new_session = NewSession {
-//detached: Some(true),
-//session_name: Some(TEST_SESSION_NAME),
-//..Default::default()
-//};
-//tmux.new_session(Some(&new_session)).unwrap();
+    let mut tmux = TmuxInterface::new();
+    let new_session = NewSession {
+        detached: Some(true),
+        session_name: Some(TEST_SESSION_NAME),
+        ..Default::default()
+    };
+    tmux.new_session(Some(&new_session)).unwrap();
 
-//let windows_cfg = WindowsCfg::get("0", WINDOW_ALL, PANE_ALL).unwrap();
-//let windows_str = serde_yaml::to_string(&windows_cfg).unwrap();
-////print!("{}", windows_str);
-//tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
-//.unwrap();
-//}
+    assert!(WindowsCfg::get(TEST_SESSION_NAME, WINDOW_ALL, PANE_ALL).is_ok());
+    //let windows_str = serde_yaml::to_string(&windows_cfg).unwrap();
+    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+        .unwrap();
+}
