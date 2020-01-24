@@ -18,6 +18,7 @@ fn pane_create() {
         ..Default::default()
     };
     tmux.new_session(Some(&new_session)).unwrap();
+    dbg!(pane_cfg.create(&format!("{}:^", TEST_SESSION_NAME)));
     assert!(pane_cfg.create(&format!("{}:^", TEST_SESSION_NAME)).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
