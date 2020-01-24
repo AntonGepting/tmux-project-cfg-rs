@@ -47,7 +47,7 @@ fn pane_create_from_str() {
     };
     tmux.new_session(Some(&new_session)).unwrap();
     let pane_cfg: PaneCfg = serde_yaml::from_str(&pane_str).unwrap();
-    assert!(pane_cfg.create(&format!("{}:1", TEST_SESSION_NAME)).is_ok());
+    assert!(pane_cfg.create(&format!("{}:^", TEST_SESSION_NAME)).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
 }
