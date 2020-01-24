@@ -4,6 +4,7 @@ fn window_create() {
     use tmux_project_cfg::window_cfg::{WindowCfg, WindowOptionsCfg};
 
     const TEST_SESSION_NAME: &'static str = "window_create";
+    const TEST_WINDOW_NAME: &'static str = "window1";
 
     let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
@@ -17,12 +18,10 @@ fn window_create() {
         detached: Some(true),
         ..Default::default()
     };
-    let window_cfg = WindowCfg::new("asdf".to_string(), Some(options));
-    let id = window_cfg.create(TEST_SESSION_NAME, 5).unwrap();
+    let window_cfg = WindowCfg::new(TEST_WINDOW_NAME.to_string(), Some(options));
+    assert!(window_cfg.create(TEST_SESSION_NAME, 5).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    assert!(id > 0);
 }
 
 #[test]
@@ -47,12 +46,9 @@ fn window_create_from_str() {
             keys: ["top"]
     "#;
     let window_cfg: WindowCfg = serde_yaml::from_str(window_str).unwrap();
-    let id = window_cfg.create(TEST_SESSION_NAME, 5).unwrap();
-
+    assert!(window_cfg.create(TEST_SESSION_NAME, 5).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    assert!(id > 0);
 }
 
 //#[test]

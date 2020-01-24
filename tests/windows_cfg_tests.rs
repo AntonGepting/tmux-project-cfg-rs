@@ -39,18 +39,13 @@ fn windows_create() {
     windows_cfg.push(window1_cfg);
     windows_cfg.push(window2_cfg);
     windows_cfg.push(window3_cfg);
-    let ids = windows_cfg.create(TEST_SESSION_NAME).unwrap();
-
+    assert!(windows_cfg.create(TEST_SESSION_NAME).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 #[test]
-fn windows_from_str() {
+fn windows_create_from_str() {
     use tmux_interface::{NewSession, TmuxInterface};
     use tmux_project_cfg::windows_cfg::WindowsCfg;
 
@@ -73,14 +68,9 @@ fn windows_from_str() {
           detached: true
     "#;
     let windows_cfg: WindowsCfg = serde_yaml::from_str(windows_str).unwrap();
-    let ids = windows_cfg.create(TEST_SESSION_NAME).unwrap();
-
+    assert!(windows_cfg.create(TEST_SESSION_NAME).is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 #[test]

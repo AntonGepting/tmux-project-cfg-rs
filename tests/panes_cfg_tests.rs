@@ -39,17 +39,11 @@ fn panes_create() {
         ..Default::default()
     };
     tmux.new_session(Some(&new_session)).unwrap();
-
-    let ids = panes_cfg
+    assert!(panes_cfg
         .create(&format!("{}:1", TEST_SESSION_NAME))
-        .unwrap();
-
+        .is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 #[test]
@@ -89,16 +83,12 @@ fn panes_create_from_str() {
     };
 
     tmux.new_session(Some(&new_session)).unwrap();
-    let ids = panes_cfg
+    assert!(panes_cfg
         .create(&format!("{}:1", TEST_SESSION_NAME))
-        .unwrap();
+        .is_ok());
 
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
-
-    for id in ids {
-        assert!(id > 0);
-    }
 }
 
 #[test]
