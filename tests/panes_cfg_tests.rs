@@ -40,7 +40,7 @@ fn panes_create() {
     };
     tmux.new_session(Some(&new_session)).unwrap();
     assert!(panes_cfg
-        .create(&format!("{}:1", TEST_SESSION_NAME))
+        .create(&format!("{}:^", TEST_SESSION_NAME))
         .is_ok());
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
         .unwrap();
@@ -84,7 +84,7 @@ fn panes_create_from_str() {
 
     tmux.new_session(Some(&new_session)).unwrap();
     assert!(panes_cfg
-        .create(&format!("{}:1", TEST_SESSION_NAME))
+        .create(&format!("{}:^", TEST_SESSION_NAME))
         .is_ok());
 
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
@@ -135,9 +135,9 @@ fn panes_get() {
 
     tmux.new_session(Some(&new_session)).unwrap();
     panes_cfg_orig
-        .create(&format!("{}:1", TEST_SESSION_NAME))
+        .create(&format!("{}:^", TEST_SESSION_NAME))
         .unwrap();
-    let panes_cfg = PanesCfg::get(&format!("{}:1", TEST_SESSION_NAME), PANE_ALL).unwrap();
+    let panes_cfg = PanesCfg::get(&format!("{}:^", TEST_SESSION_NAME), PANE_ALL).unwrap();
     //let panes_str = serde_yaml::to_string(&panes_cfg).unwrap();
     //dbg!(panes_str);
     tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
