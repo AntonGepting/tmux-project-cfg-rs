@@ -1,10 +1,13 @@
 #[test]
 fn panes_create() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{
+        NewSession, TargetSession, TargetWindowEx, TargetWindowToken, TmuxInterface,
+    };
     use tmux_project_cfg::pane_cfg::{PaneCfg, PaneOptionsCfg};
     use tmux_project_cfg::panes_cfg::PanesCfg;
 
     const TEST_SESSION_NAME: &'static str = "panes_create";
+    let target_session = TargetSession::Raw(TEST_SESSION_NAME);
 
     let pane1_cfg = PaneCfg::new(
         "1".to_string(),
@@ -40,39 +43,45 @@ fn panes_create() {
     };
     tmux.new_session(Some(&new_session)).unwrap();
     assert!(panes_cfg
-        .create(&format!("{}:^", TEST_SESSION_NAME))
+        .create(&TargetWindowEx::token(
+            Some(&target_session),
+            TargetWindowToken::Start
+        ))
         .is_ok());
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+    tmux.kill_session(None, None, Some(&target_session))
         .unwrap();
 }
 
 #[test]
 fn panes_create_from_str() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{
+        NewSession, TargetSession, TargetWindowEx, TargetWindowToken, TmuxInterface,
+    };
     use tmux_project_cfg::panes_cfg::PanesCfg;
 
     const TEST_SESSION_NAME: &'static str = "panes_create_from_str";
+    let target_session = TargetSession::Raw(TEST_SESSION_NAME);
 
     let pane_str = r#"
-    - pane1:
-        detached: true
-        send_keys:
-            keys: ["top"]
+        - pane1:
+            detached: true
+            send_keys:
+                keys: ["top"]
 
-    - pane2:
-        detached: true
-        horizontal: true
-        percentage: 50
-        send_keys:
-            keys: ["top"]
+        - pane2:
+            detached: true
+            horizontal: true
+            percentage: 50
+            send_keys:
+                keys: ["top"]
 
-    - pane2:
-        detached: true
-        horizontal: true
-        percentage: 50
-        send_keys:
-            keys: ["top"]
-    "#;
+        - pane2:
+            detached: true
+            horizontal: true
+            percentage: 50
+            send_keys:
+                keys: ["top"]
+        "#;
     let panes_cfg: PanesCfg = serde_yaml::from_str(pane_str).unwrap();
 
     let mut tmux = TmuxInterface::new();
@@ -84,16 +93,21 @@ fn panes_create_from_str() {
 
     tmux.new_session(Some(&new_session)).unwrap();
     assert!(panes_cfg
-        .create(&format!("{}:^", TEST_SESSION_NAME))
+        .create(&TargetWindowEx::token(
+            Some(&target_session),
+            TargetWindowToken::Start
+        ))
         .is_ok());
 
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+    tmux.kill_session(None, None, Some(&target_session))
         .unwrap();
 }
 
 #[test]
 fn panes_get() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{
+        NewSession, TargetSession, TargetWindowEx, TargetWindowToken, TmuxInterface,
+    };
     use tmux_project_cfg::pane_cfg::{PaneCfg, PaneOptionsCfg};
     use tmux_project_cfg::panes_cfg::PanesCfg;
     use tmux_project_cfg::PANE_ALL;
@@ -126,6 +140,7 @@ fn panes_get() {
     panes_cfg_orig.push(pane2_cfg);
     panes_cfg_orig.push(pane3_cfg);
 
+    let target_session = TargetSession::new(TEST_SESSION_NAME);
     let mut tmux = TmuxInterface::new();
     let new_session = NewSession {
         detached: Some(true),
@@ -134,13 +149,9 @@ fn panes_get() {
     };
 
     tmux.new_session(Some(&new_session)).unwrap();
-    panes_cfg_orig
-        .create(&format!("{}:^", TEST_SESSION_NAME))
+    let target_window = TargetWindowEx::token(Some(&target_session), TargetWindowToken::Start);
+    panes_cfg_orig.create(&target_window).unwrap();
+    assert!(PanesCfg::get(&target_window, PANE_ALL).is_some());
+    tmux.kill_session(None, None, Some(&TargetSession::new(TEST_SESSION_NAME)))
         .unwrap();
-    let panes_cfg = PanesCfg::get(&format!("{}:^", TEST_SESSION_NAME), PANE_ALL).unwrap();
-    //let panes_str = serde_yaml::to_string(&panes_cfg).unwrap();
-    //dbg!(panes_str);
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
-        .unwrap();
-    //assert_eq!(panes_cfg, panes_cfg_orig);
 }

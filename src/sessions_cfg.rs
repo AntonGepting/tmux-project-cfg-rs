@@ -1,5 +1,6 @@
 use super::error::Error;
 use super::session_cfg::SessionCfg;
+use super::tmux_interface::TargetSession;
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SessionsCfg(Vec<SessionCfg>);
@@ -50,15 +51,15 @@ impl SessionsCfg {
     // XXX: struct bitflags
     // XXX: project bitflags
     pub fn get(
-        sessions_names: &Vec<&str>,
+        target_sessions: &Vec<&TargetSession>,
         sbitflags: usize,
         wbitflags: usize,
         pbitflags: usize,
     ) -> Result<SessionsCfg, Error> {
         let mut sessions_cfg = SessionsCfg::new();
         let mut session_cfg: SessionCfg;
-        for session_name in sessions_names {
-            session_cfg = SessionCfg::get(session_name, sbitflags, wbitflags, pbitflags)?;
+        for target_session in target_sessions {
+            session_cfg = SessionCfg::get(target_session, sbitflags, wbitflags, pbitflags)?;
             sessions_cfg.push(session_cfg);
         }
         Ok(sessions_cfg)

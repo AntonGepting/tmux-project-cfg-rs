@@ -1,6 +1,6 @@
 #[test]
 fn windows_create() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{NewSession, TargetSession, TmuxInterface};
     use tmux_project_cfg::window_cfg::{WindowCfg, WindowOptionsCfg};
     use tmux_project_cfg::windows_cfg::WindowsCfg;
 
@@ -39,14 +39,16 @@ fn windows_create() {
     windows_cfg.push(window1_cfg);
     windows_cfg.push(window2_cfg);
     windows_cfg.push(window3_cfg);
-    assert!(windows_cfg.create(TEST_SESSION_NAME).is_ok());
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+    assert!(windows_cfg
+        .create(&TargetSession::Raw(TEST_SESSION_NAME))
+        .is_ok());
+    tmux.kill_session(None, None, Some(&TargetSession::Raw(TEST_SESSION_NAME)))
         .unwrap();
 }
 
 #[test]
 fn windows_create_from_str() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{NewSession, TargetSession, TmuxInterface};
     use tmux_project_cfg::windows_cfg::WindowsCfg;
 
     const TEST_SESSION_NAME: &'static str = "windows_create_from_str";
@@ -60,22 +62,24 @@ fn windows_create_from_str() {
     tmux.new_session(Some(&new_session)).unwrap();
 
     let windows_str = r#"
-      - window1:
-          detached: true
-      - window2:
-          detached: true
-      - window3:
-          detached: true
-    "#;
+        - window1:
+            detached: true
+        - window2:
+            detached: true
+        - window3:
+            detached: true
+        "#;
     let windows_cfg: WindowsCfg = serde_yaml::from_str(windows_str).unwrap();
-    assert!(windows_cfg.create(TEST_SESSION_NAME).is_ok());
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+    assert!(windows_cfg
+        .create(&TargetSession::Raw(TEST_SESSION_NAME))
+        .is_ok());
+    tmux.kill_session(None, None, Some(&TargetSession::Raw(TEST_SESSION_NAME)))
         .unwrap();
 }
 
 #[test]
 fn windows_get() {
-    use tmux_interface::{NewSession, TmuxInterface};
+    use tmux_interface::{NewSession, TargetSession, TmuxInterface};
     use tmux_project_cfg::windows_cfg::WindowsCfg;
     use tmux_project_cfg::{PANE_ALL, WINDOW_ALL};
 
@@ -88,9 +92,9 @@ fn windows_get() {
         ..Default::default()
     };
     tmux.new_session(Some(&new_session)).unwrap();
+    let target_session = TargetSession::new(TEST_SESSION_NAME);
 
-    assert!(WindowsCfg::get(TEST_SESSION_NAME, WINDOW_ALL, PANE_ALL).is_ok());
-    //let windows_str = serde_yaml::to_string(&windows_cfg).unwrap();
-    tmux.kill_session(None, None, Some(TEST_SESSION_NAME))
+    assert!(WindowsCfg::get(&target_session, WINDOW_ALL, PANE_ALL).is_ok());
+    tmux.kill_session(None, None, Some(&target_session))
         .unwrap();
 }

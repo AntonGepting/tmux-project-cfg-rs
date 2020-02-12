@@ -1,6 +1,8 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::{TmuxInterface, TmuxOption, Windows};
+use self::tmux_interface::{
+    TargetSession, TargetWindowEx, TargetWindowToken, TmuxInterface, TmuxOption, Windows,
+};
 use super::error::Error;
 use super::panes_cfg::PanesCfg;
 use super::window_cfg::{WindowCfg, WindowOptionsCfg};
@@ -16,7 +18,7 @@ impl WindowsCfg {
 
     // TODO: defaults if needed
     // XXX: ref window_cfg
-    pub fn create(&self, target_session: &str) -> Result<Vec<usize>, Error> {
+    pub fn create(&self, target_session: &TargetSession) -> Result<Vec<usize>, Error> {
         let mut ids = Vec::new();
         for (i, window_cfg) in self.0.iter().enumerate() {
             //if window.window_name.is_none() {
@@ -25,26 +27,33 @@ impl WindowsCfg {
             //}
             let (key, first_value) = window_cfg.0.iter().next().unwrap();
             // if custom index is given
-            if let Some(idx) = first_value.as_ref().unwrap().index {
-                window_cfg.clone().create(target_session, idx)?;
+            if let Some(index) = first_value.as_ref().unwrap().index {
+                window_cfg
+                    .clone()
+                    .create(TargetWindowEx::index(Some(&target_session), index))?;
             // use default index
             } else {
                 // if first window different behavior (because tmux creates window by creating a session)
                 // XXX: and index is not given
                 if i == 0 {
-                    let target_window_str = format!("{}:^", target_session);
                     // rename first
-                    window_cfg.clone().rename(&target_window_str, &key)?;
+                    window_cfg.clone().rename(
+                        &TargetWindowEx::token(Some(&target_session), TargetWindowToken::Start),
+                        &key,
+                    )?;
                 //.rename(&target_window_str, &first_value.as_ref().unwrap().window_name.clone().unwrap());
                 // create manually panes
                 //window_cfg
                 //.panes
                 //.as_ref()
                 //.and_then(|panes| panes.create(&target_window_str).ok());
+
                 // second and others windows
                 } else {
                     let base_index = TmuxOption::get_int("base-index")?;
-                    let id = window_cfg.clone().create(target_session, i + base_index)?;
+                    let id = window_cfg
+                        .clone()
+                        .create(TargetWindowEx::index(Some(&target_session), i + base_index))?;
                     ids.push(id);
                 }
                 //if let Some(ref start_directory) = self.start_directory {
@@ -57,7 +66,7 @@ impl WindowsCfg {
     }
 
     pub fn get(
-        target_session: &str,
+        target_session: &TargetSession,
         wbitflags: usize,
         pbitflags: usize,
     ) -> Result<WindowsCfg, Error> {
@@ -65,10 +74,12 @@ impl WindowsCfg {
         let mut windows_cfg = WindowsCfg::new();
         let mut window_cfg: WindowCfg;
         if tmux.has_session(Some(target_session))? {
-            let windows = Windows::get(&target_session, wbitflags).unwrap();
+            let windows = Windows::get(target_session, wbitflags).unwrap();
             for window in windows {
+                //let target_window =
+                //format!("{}:{}", &target_session, &window.clone().index.unwrap());
                 let target_window =
-                    format!("{}:{}", &target_session, &window.clone().index.unwrap());
+                    TargetWindowEx::index(Some(&target_session), window.index.unwrap());
                 let panes_cfg = PanesCfg::get(&target_window, pbitflags);
                 let mut options = WindowOptionsCfg {
                     //activity: window.activity.map(|t| t.as_millis()),

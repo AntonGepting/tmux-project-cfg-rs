@@ -1,6 +1,6 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::Panes;
+use self::tmux_interface::{Panes, TargetPaneEx, TargetWindowEx};
 use super::error::Error;
 use super::pane_cfg::{PaneCfg, PaneOptionsCfg};
 
@@ -19,7 +19,7 @@ impl PanesCfg {
     }
 
     // TODO: Some, None
-    pub fn get(target_window: &str, bitflags: usize) -> Option<PanesCfg> {
+    pub fn get(target_window: &TargetWindowEx, bitflags: usize) -> Option<PanesCfg> {
         let mut panes_cfg = PanesCfg::new();
         let mut _pane_cfg: PaneCfg;
 
@@ -60,19 +60,19 @@ impl PanesCfg {
     }
 
     // TODO: defaults if needed
-    pub fn create(&self, target_window: &str) -> Result<Vec<usize>, Error> {
+    pub fn create(&self, target_window: &TargetWindowEx) -> Result<Vec<usize>, Error> {
         let mut ids = Vec::new();
         for (i, pane_cfg) in self.0.iter().enumerate() {
             // if first pane different behavior (tmux creates one by creating a window)
             let (_key, first_value) = pane_cfg.0.iter().next().unwrap();
             if i == 0 {
-                let target_pane_str = format!("{}.0", target_window);
+                //let target_pane_str = format!("{}.0", target_window);
                 //pane_cfg.rename(&target_window_str, &window.window_name.clone().unwrap());
                 if let Some(ref send_keys) = first_value.as_ref().unwrap().send_keys {
-                    send_keys.send(&target_pane_str)?;
+                    send_keys.send(&TargetPaneEx::index(Some(&target_window), 0))?;
                 }
             } else {
-                let id = pane_cfg.create(target_window)?;
+                let id = pane_cfg.create(&target_window)?;
                 ids.push(id);
             }
             //if let Some(ref session_name) = map.keys().next() {

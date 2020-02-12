@@ -8,7 +8,7 @@ use super::sessions_cfg::SessionsCfg;
 use std::fs;
 use std::path::PathBuf;
 
-use self::tmux_interface::{AttachSession, TmuxInterface};
+use self::tmux_interface::{AttachSession, TargetSession, TmuxInterface};
 
 // TODO: #[skip_serializing_null] added in new serde
 // XXX: cant use borrowed values [link](https://github.com/dtolnay/serde-yaml/issues/94)
@@ -69,8 +69,9 @@ impl ProjectCfg {
     pub fn attach(&self) -> Result<(), Error> {
         if !self.detached.unwrap_or(false) && self.attach.is_some() {
             let mut tmux = TmuxInterface::new();
+            let target_session = self.attach.as_ref().map(|s| TargetSession::new(&s));
             let attach_session = AttachSession {
-                target_session: self.attach.as_ref().map(|s| s.as_ref()),
+                target_session: target_session.as_ref(),
                 ..Default::default()
             };
             tmux.attach_session(Some(&attach_session))?;
@@ -79,13 +80,13 @@ impl ProjectCfg {
     }
 
     pub fn get(
-        sessions_names: &Vec<&str>,
+        target_sessions: &Vec<&TargetSession>,
         sbitflags: usize,
         wbitflags: usize,
         pbitflags: usize,
     ) -> Result<ProjectCfg, Error> {
         let mut project = ProjectCfg::new();
-        let sessions_cfg = SessionsCfg::get(&sessions_names, sbitflags, wbitflags, pbitflags)?;
+        let sessions_cfg = SessionsCfg::get(&target_sessions, sbitflags, wbitflags, pbitflags)?;
         project.sessions = Some(sessions_cfg);
         Ok(project)
     }

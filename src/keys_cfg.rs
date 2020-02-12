@@ -1,7 +1,6 @@
 extern crate tmux_interface;
 
-use self::tmux_interface::SendKeys;
-use self::tmux_interface::TmuxInterface;
+use self::tmux_interface::{SendKeys, TargetPaneEx, TmuxInterface};
 use super::error::Error;
 
 //use super::project_cfg::ProjectCfg;
@@ -31,7 +30,7 @@ impl KeysCfg {
         Default::default()
     }
 
-    pub fn send(&self, target_pane: &str) -> Result<(), Error> {
+    pub fn send(&self, target_pane: &TargetPaneEx) -> Result<(), Error> {
         let mut keys = Vec::new();
         if let Some(key) = &self.keys {
             keys = key.iter().map(|k| k.as_ref()).collect();
