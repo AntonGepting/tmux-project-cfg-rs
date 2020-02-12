@@ -77,7 +77,7 @@ fn window_get() {
     };
     tmux.new_session(Some(&new_session)).unwrap();
 
-    assert!(WindowCfg::get(&target_session, 1, WINDOW_ALL, PANE_ALL).is_ok());
+    assert!(WindowCfg::get(&target_session, 0, WINDOW_ALL, PANE_ALL).is_ok());
     tmux.kill_session(None, None, Some(&target_session))
         .unwrap();
 }
