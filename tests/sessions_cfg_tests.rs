@@ -39,6 +39,11 @@ fn sessions_from_str() {
     let sessions_str = r#"
       - session1:
           detached: true
+          windows:
+            - window1:
+                detached: true
+            - window2:
+                detached: true
       - session2:
           detached: true
       - session3:
