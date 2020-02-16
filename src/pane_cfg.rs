@@ -100,8 +100,7 @@ impl PaneCfg {
                     cwd: pane.current_path,
                     ..Default::default()
                 };
-                // save active status of the pane
-                // do not save inactive status (inactive by default)
+                // save active status of the pane (inactive by default)
                 if pane.active.unwrap_or(false) {
                     options.active = pane.active;
                 }
@@ -163,5 +162,100 @@ pub struct PaneOptionsCfg {
 impl PaneOptionsCfg {
     pub fn new() -> Self {
         Default::default()
+    }
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Clone, Default, Debug)]
+pub struct PaneOptionsCfgBuilder<'a> {
+    pub active: Option<bool>, // set: SelectPane.?; get: Pane.active
+    pub before: Option<bool>, // set: SplitWindow.before; get:
+    //pub index: Option<usize>, // set: - ; get: Pane.index
+    pub detached: Option<bool>, // set: SplitWindow.detached; get: ? (derive Pane.active?)
+    pub full_window: Option<bool>, // set: SplitWindow.full; get:
+    pub vertical: Option<bool>, // set: SplitWindow.vertical; get: ? (Pane.at_left, .at_bottom, .at_top, .at_right)
+    pub horizontal: Option<bool>, // set: SplitWindow.horizontal; get: ? (Pane.at_left, .at_bottom, .at_top, .at_right)
+    //pub print: Option<bool>, // set: SplitWindow.print; get:
+    pub cwd: Option<&'a str>, // set: SplitWindow.cwd; get: Pane.current_path
+    pub size: Option<usize>,  // set: SplitWindow.size; get: Pane.width or Pane.height
+    pub percentage: Option<usize>, // set: SplitWindow.percentage; get: ? (calculate?)
+    //pub target_pane: Option<String>, // set: SplitWindow.target_pane; get:
+    pub shell_command: Option<&'a str>, // set: SplitWindow.shell_command; get: Pane.start_command
+    //pub format: Option<String>, // set: SplitWindow.format; get: -
+    pub send_keys: Option<KeysCfg>, // set: SendKeys; get: ? (derive Pane.current_command?)
+}
+
+impl<'a> PaneOptionsCfgBuilder<'a> {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn active(&mut self) -> &mut Self {
+        self.active = Some(true);
+        self
+    }
+
+    pub fn before(&mut self) -> &mut Self {
+        self.before = Some(true);
+        self
+    }
+
+    pub fn detached(&mut self) -> &mut Self {
+        self.detached = Some(true);
+        self
+    }
+
+    pub fn full_window(&mut self) -> &mut Self {
+        self.full_window = Some(true);
+        self
+    }
+
+    pub fn vertical(&mut self) -> &mut Self {
+        self.vertical = Some(true);
+        self
+    }
+
+    pub fn horizontal(&mut self) -> &mut Self {
+        self.horizontal = Some(true);
+        self
+    }
+
+    pub fn cwd(&mut self, cwd: &'a str) -> &mut Self {
+        self.cwd = Some(cwd);
+        self
+    }
+
+    pub fn size(&mut self, size: usize) -> &mut Self {
+        self.size = Some(size);
+        self
+    }
+
+    pub fn percentage(&mut self, percentage: usize) -> &mut Self {
+        self.percentage = Some(percentage);
+        self
+    }
+
+    pub fn shell_command(&mut self, shell_command: &'a str) -> &mut Self {
+        self.shell_command = Some(shell_command);
+        self
+    }
+
+    pub fn build(&self) -> PaneOptionsCfg {
+        PaneOptionsCfg {
+            active: self.active,
+            before: self.before,
+            //index: Option<usize>,
+            detached: self.detached,
+            full_window: self.full_window,
+            vertical: self.vertical,
+            horizontal: self.horizontal,
+            //print: Option<bool>,
+            cwd: self.cwd.map(|s| s.to_string()),
+            size: self.size,
+            percentage: self.percentage,
+            //target_pane: Option<String>,
+            shell_command: self.shell_command.map(|s| s.to_string()),
+            //format: Option<String>,
+            send_keys: self.send_keys.clone(),
+        }
     }
 }
