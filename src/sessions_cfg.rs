@@ -1,6 +1,7 @@
 use super::error::Error;
-use super::session_cfg::SessionCfg;
-use super::tmux_interface::TargetSession;
+use super::session_cfg::{SessionCfg, SessionOptionsCfg};
+use super::tmux_interface::{Sessions, TargetSession, SESSION_NAME};
+use super::windows_cfg::WindowsCfg;
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct SessionsCfg(Vec<SessionCfg>);
@@ -50,6 +51,7 @@ impl SessionsCfg {
 
     // XXX: struct bitflags
     // XXX: project bitflags
+    // TODO: multiple requesting only possible (cant get a single pane, window, session?!)
     pub fn get(
         target_sessions: &Vec<&TargetSession>,
         sbitflags: usize,
@@ -57,10 +59,26 @@ impl SessionsCfg {
         pbitflags: usize,
     ) -> Result<SessionsCfg, Error> {
         let mut sessions_cfg = SessionsCfg::new();
-        let mut session_cfg: SessionCfg;
+        //let mut session_cfg: SessionCfg;
+        let sessions = Sessions::get(sbitflags | SESSION_NAME)?;
+
         for target_session in target_sessions {
-            session_cfg = SessionCfg::get(target_session, sbitflags, wbitflags, pbitflags)?;
-            sessions_cfg.push(session_cfg);
+            //session_cfg = SessionCfg::get(target_session, sbitflags, wbitflags, pbitflags)?;
+            // TODO: ref not clone?!
+            for session in sessions.clone() {
+                if session.name == Some(target_session.to_string()) {
+                    let windows_cfg = WindowsCfg::get(target_session, wbitflags, pbitflags).ok();
+                    let options = SessionOptionsCfg {
+                        activity: session.activity.map(|t| t.as_millis()),
+                        created: session.created.map(|t| t.as_millis()),
+                        last_attached: session.last_attached.map(|t| t.as_millis()),
+                        windows: windows_cfg,
+                        ..Default::default()
+                    };
+                    let session_cfg = SessionCfg::new(session.name.unwrap(), Some(options));
+                    sessions_cfg.push(session_cfg);
+                }
+            }
         }
         Ok(sessions_cfg)
     }
